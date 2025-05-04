@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -21,101 +20,75 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "./ui/input";
-import { useUpdateUserProfile } from "@/hooks/auth";
 import { toast } from "sonner";
-import { AxiosError } from "axios";
-import { UserUpdate } from "@/api/models";
-import { Loader2 } from "lucide-react";
+import StateButton from "./state-button";
+import { useUpdateUserInfo } from "@/api/endpoints/users/users.gen";
 
 const passwordFormSchema = z
   .object({
-    currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z
+    current_password: z.string().min(1, "Current password is required"),
+    new_password: z.string().min(8, "Password must be at least 8 characters"),
+    confirm_password: z
       .string()
       .min(8, "Password must be at least 8 characters"),
   })
-  .refine((obj) => obj.newPassword === obj.confirmPassword, {
+  .refine((obj) => obj.new_password === obj.confirm_password, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
+  })
+  .refine((obj) => obj.new_password !== obj.current_password, {
+    message: "New password must be different from current password",
   });
 
-type PasswordFormData = z.infer<typeof passwordFormSchema>;
+export type PasswordFormData = z.infer<typeof passwordFormSchema>;
 
 interface PasswordChangeDialogProps {
   trigger: React.ReactNode;
-  handleSubmit: (data: PasswordFormData) => void;
 }
 
-export function PasswordChangeDialog({
-  trigger,
-  handleSubmit: onSubmit,
-}: PasswordChangeDialogProps) {
+export function PasswordChangeDialog({ trigger }: PasswordChangeDialogProps) {
   const [open, setOpen] = useState(false);
 
   const form = useForm<PasswordFormData>({
     resolver: zodResolver(passwordFormSchema),
     defaultValues: {
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
+      current_password: "",
+      new_password: "",
+      confirm_password: "",
     },
     mode: "onChange",
   });
 
-  const {
-    handleSubmit,
-    isPending,
-    isSuccess,
-    wasExecuted,
-    isError,
-    error,
-    resetMutation,
-  } = useUpdateUserProfile();
-
-  const onFormSubmit = async (data: PasswordFormData) => {
-    try {
-      // Create a password update object
-      const passwordUpdate: UserUpdate = {
-        password: {
-          current_password: data.currentPassword,
-          new_password: data.newPassword,
-        },
-      };
-
-      await handleSubmit(passwordUpdate);
-
-      toast.success("Password changed successfully");
-      form.reset();
-      // Keep dialog open for 1.5 seconds to show success state before closing
-      setTimeout(() => {
-        setOpen(false);
-      }, 1500);
-
-      if (onSubmit) {
-        onSubmit(data);
-      }
-    } catch (err) {
-      const errorMessage =
-        err instanceof AxiosError
-          ? err.response?.data?.detail || err.message
-          : "Failed to change password";
-
-      toast.error(errorMessage);
-    }
-  };
+  const changePassword = useUpdateUserInfo();
 
   useEffect(() => {
-    if (isError && wasExecuted) {
-      const errorMessage = error
-        ? error.response?.data?.detail || error.message
-        : "Failed to change password";
-      toast.error(errorMessage as string);
+    if (changePassword.isError) {
+      const errorMessage = changePassword.error.response?.data.detail
+        ? String(error.response.data.detail)
+        : error?.message ?? "Failed to change password";
+      toast.error(errorMessage);
       setTimeout(() => {
-        resetMutation();
+        changePassword.reset();
       }, 2000);
     }
-  }, [isError, wasExecuted, error, resetMutation]);
+  }, [changePassword, changePassword.isError]);
+
+  useEffect(() => {
+    if (changePassword.isSuccess) {
+      toast.success("Password changed successfully");
+      setTimeout(() => {
+        changePassword.reset();
+        setOpen(false);
+        form.reset();
+      }, 2000);
+    }
+  }, [changePassword.isSuccess, changePassword, form]);
+
+  useEffect(() => {
+    if (!open) {
+      form.reset();
+    }
+  }, [open, form]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -130,12 +103,24 @@ export function PasswordChangeDialog({
         </DialogHeader>
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(onFormSubmit)}
+            onSubmit={
+              void form.handleSubmit((data) => {
+                void changePassword.mutateAsync({
+                  userId: "me",
+                  data: {
+                    password: {
+                      current_password: data.current_password,
+                      new_password: data.new_password,
+                    },
+                  },
+                });
+              })
+            }
             className="space-y-4 py-4"
           >
             <FormField
               control={form.control}
-              name="currentPassword"
+              name="current_password"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Current Password</FormLabel>
@@ -148,7 +133,7 @@ export function PasswordChangeDialog({
             />
             <FormField
               control={form.control}
-              name="newPassword"
+              name="new_password"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
@@ -161,7 +146,7 @@ export function PasswordChangeDialog({
             />
             <FormField
               control={form.control}
-              name="confirmPassword"
+              name="confirm_password"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Confirm New Password</FormLabel>
@@ -173,32 +158,21 @@ export function PasswordChangeDialog({
               )}
             />
             <DialogFooter className="pt-4">
-              <Button
+              <StateButton
                 type="submit"
-                disabled={isPending}
-                className={`${
-                  isPending
-                    ? "bg-primary animate-pulse"
-                    : isSuccess
-                    ? "bg-green-500 hover:bg-green-600"
-                    : isError
-                    ? "bg-red-500 hover:bg-red-600"
-                    : "bg-primary hover:bg-primary-dark"
-                }`}
+                disabled={changePassword.isPending}
+                variant={
+                  changePassword.isPending
+                    ? "loading"
+                    : changePassword.isSuccess
+                    ? "success"
+                    : changePassword.isError
+                    ? "error"
+                    : "default"
+                }
               >
-                {isPending ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2" />
-                    Processing...
-                  </>
-                ) : isSuccess ? (
-                  "Success"
-                ) : isError ? (
-                  "Error"
-                ) : (
-                  "Submit"
-                )}
-              </Button>
+                Save
+              </StateButton>
             </DialogFooter>
           </form>
         </Form>

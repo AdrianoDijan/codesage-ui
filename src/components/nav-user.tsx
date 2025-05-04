@@ -51,7 +51,6 @@ export function NavUser({
     if (onLogout) {
       onLogout();
     } else {
-      // Use the existing logout function from auth.tsx
       logout();
     }
   };
@@ -107,7 +106,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => navigate("/account")}>
+              <DropdownMenuItem
+                onSelect={() => {
+                  navigate("/account");
+                }}
+              >
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>

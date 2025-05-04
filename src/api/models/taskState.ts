@@ -7,6 +7,7 @@
 
 export type TaskState = typeof TaskState[keyof typeof TaskState];
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const TaskState = {
   pending: "pending",
   running: "running",

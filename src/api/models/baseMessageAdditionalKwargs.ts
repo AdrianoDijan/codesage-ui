@@ -5,4 +5,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type BaseMessageAdditionalKwargs = { [key: string]: unknown };
+export type BaseMessageAdditionalKwargs = Record<string, unknown>;

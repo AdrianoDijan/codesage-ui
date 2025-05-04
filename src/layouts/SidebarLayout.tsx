@@ -2,16 +2,18 @@ import { Outlet } from "react-router";
 import { AppSidebar, SidebarData } from "@/components/sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useGetUserInfo } from "@/api/endpoints/users/users.gen";
-import { Toaster } from "sonner";
+import { HomeIcon } from "lucide-react";
+import { Toaster } from "@/components/ui/sonner";
+import { ModeToggle } from "@/components/mode-toggle";
 
 const useUserSidebarData = (): SidebarData => {
   const { data } = useGetUserInfo("me");
 
-  const userName = data?.data?.first_name
-    ? `${data?.data?.first_name} ${data?.data?.last_name}`
-    : data?.data?.username || "";
+  const userName = data?.data.first_name
+    ? `${String(data.data.first_name)} ${String(data.data.last_name ?? "")}`
+    : data?.data.username ?? "";
 
-  const userEmail = data?.data?.email || "";
+  const userEmail = data?.data.email ?? "";
 
   return {
     user: {
@@ -19,7 +21,14 @@ const useUserSidebarData = (): SidebarData => {
       email: userEmail,
       avatar: "",
     },
-    navMain: [],
+    navMain: [
+      {
+        title: "Home",
+        url: "/",
+        icon: HomeIcon,
+        isActive: false,
+      },
+    ],
     projects: [],
   };
 };
@@ -31,10 +40,13 @@ function MainLayout() {
     <SidebarProvider>
       <AppSidebar sidebarData={sidebarData} />
       <main className="flex-1 overflow-auto p-4">
-        <SidebarTrigger className="mb-4" />
+        <div className="flex items-center justify-between mb-4">
+          <SidebarTrigger />
+          <ModeToggle />
+        </div>
         <Outlet />
-        <Toaster />
       </main>
+      <Toaster />
     </SidebarProvider>
   );
 }

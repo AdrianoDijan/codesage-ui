@@ -1,6 +1,5 @@
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 import {
   Form,
@@ -10,34 +9,64 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { z } from "zod";
+import StateButton from "@/components/state-button";
+import { useNavigate } from "react-router";
+import { useLogin } from "@/api/endpoints/authentication/authentication.gen";
+import { toast } from "sonner";
 
 export const LoginFormSchema = z.object({
   username: z.string().nonempty(),
   password: z.string().min(8),
+  grant_type: z.literal("password").optional().default("password"),
 });
 
 export function LoginForm({
   className,
-  handleSubmit,
   ...props
-}: React.ComponentPropsWithoutRef<"div"> & {
-  handleSubmit: (data: z.infer<typeof LoginFormSchema>) => void;
-}) {
-  const form = useForm<z.infer<typeof LoginFormSchema>>({
+}: React.ComponentPropsWithoutRef<"div">) {
+  const form = useForm({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
       username: "",
       password: "",
+    },
+    mode: "onChange",
+  });
+
+  const navigate = useNavigate();
+  const login = useLogin({
+    mutation: {
+      onSuccess: (data) => {
+        void navigate(0);
+
+        localStorage.setItem("accessToken", data.data.access_token);
+        localStorage.setItem("refreshToken", data.data.refresh_token);
+        toast.success("Login successful");
+      },
+      onError: (error) => {
+        const errorMessage = error.response?.data.detail ?? error.message;
+        toast.error(
+          Array.isArray(errorMessage) ? errorMessage.join("\n") : errorMessage
+        );
+        login.reset();
+      },
     },
   });
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void form.handleSubmit((data) => {
+              void login.mutateAsync({ data: data });
+            })(e);
+          }}
+        >
           <div className="flex flex-col gap-6">
             <div className="w-full flex flex-col items-center gap-2">
               <div className="h-12 w-12 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-xl">
@@ -80,9 +109,22 @@ export function LoginForm({
                   )}
                 />
               </div>
-              <Button type="submit" className="w-full">
+              <StateButton
+                type="submit"
+                disabled={login.isPending}
+                className="w-full"
+                variant={
+                  login.isPending
+                    ? "loading"
+                    : login.isSuccess
+                    ? "success"
+                    : login.isError
+                    ? "error"
+                    : "default"
+                }
+              >
                 Login
-              </Button>
+              </StateButton>
             </div>
           </div>
         </form>

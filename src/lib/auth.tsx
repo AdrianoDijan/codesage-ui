@@ -1,5 +1,5 @@
+import LoginPage from "@/pages/login";
 import { ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router";
 
 export const isAuthenticated = (): boolean => {
   const accessToken = localStorage.getItem("accessToken");
@@ -9,7 +9,7 @@ export const isAuthenticated = (): boolean => {
 export const logout = (): void => {
   localStorage.removeItem("accessToken");
   localStorage.removeItem("refreshToken");
-  window.location.href = "/login";
+  window.location.href = "/";
 };
 
 interface ProtectedRouteProps {
@@ -17,11 +17,8 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const location = useLocation();
-  const navigate = useNavigate();
-
   if (!isAuthenticated()) {
-    navigate("/login", { state: { from: location }, replace: true });
+    return <LoginPage />;
   }
 
   return <>{children}</>;

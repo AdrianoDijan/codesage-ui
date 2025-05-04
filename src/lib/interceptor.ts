@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 const getAccessToken = () => {
   return localStorage.getItem("accessToken");
@@ -21,19 +21,32 @@ const deleteTokens = () => {
   localStorage.removeItem("refreshToken");
 };
 
+interface TokenResponse {
+  access_token: string;
+  refresh_token: string;
+}
+
 export const setupInterceptors = () => {
-  axios.defaults.baseURL = import.meta.env.VITE_BASE_API_URL;
+  axios.defaults.baseURL =
+    import.meta.env.VITE_BASE_API_URL ?? "http://localhost:8080";
 
   axios.interceptors.request.use(
     (config) => {
+      // Skip adding token for token refresh requests
+      if (config.url === "/api/token") {
+        return config;
+      }
+
       const accessToken = getAccessToken();
-      if (getAccessToken()) {
-        config.headers["Authorization"] = `Bearer ${accessToken}`;
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
       }
       return config;
     },
     (error) => {
-      return Promise.reject(error);
+      return Promise.reject(
+        new Error(error instanceof Error ? error.message : String(error))
+      );
     }
   );
 
@@ -42,34 +55,45 @@ export const setupInterceptors = () => {
       return response;
     },
     async (error) => {
-      const originalRequest = error.config;
-      let accessToken = getAccessToken();
-      let refreshToken = getRefreshToken();
+      if (!(error instanceof AxiosError) || !error.config) {
+        return Promise.reject(new Error("Unknown error occurred"));
+      }
 
-      if (error.response?.status === 401 && !originalRequest._retry) {
+      const originalRequest = error.config;
+      const hasRetryFlag = "_retry" in originalRequest;
+
+      if (
+        error.response?.status === 401 &&
+        !hasRetryFlag &&
+        originalRequest.url !== "/api/token"
+      ) {
+        // Add retry flag to avoid infinite loops
         originalRequest._retry = true;
+        const refreshToken = getRefreshToken();
+
+        if (!refreshToken) {
+          deleteTokens();
+          return Promise.reject(new Error("No refresh token available"));
+        }
+
         try {
-          const tokenResponse = await axios.post(`/api/token`, {
+          const tokenResponse = await axios.post<TokenResponse>(`/api/token`, {
             grant_type: "refresh_token",
             refresh_token: refreshToken,
           });
 
-          accessToken = tokenResponse.data.access_token;
-          refreshToken = tokenResponse.data.refresh_token;
-
-          if (!accessToken || !refreshToken) {
-            throw new Error("No access token or refresh token found");
-          }
+          const accessToken = tokenResponse.data.access_token;
+          const newRefreshToken = tokenResponse.data.refresh_token;
 
           saveAccessToken(accessToken);
-          saveRefreshToken(refreshToken);
+          saveRefreshToken(newRefreshToken);
 
-          originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
-          return axios(originalRequest);
-        } catch (refreshError) {
-          // Refresh failed — handle logout globally
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+          return await axios(originalRequest);
+        } catch (error) {
           deleteTokens();
-          return Promise.reject(refreshError);
+          return Promise.reject(new Error("Token refresh failed"));
         }
       }
 

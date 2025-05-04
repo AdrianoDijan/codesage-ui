@@ -7,6 +7,7 @@
 
 export type Status = typeof Status[keyof typeof Status];
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Status = {
   success: "success",
   error: "error",

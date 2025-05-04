@@ -6,7 +6,7 @@
  */
 import type { ProjectRepository } from "./projectRepository";
 import type { ProjectUser } from "./projectUser";
-import type { ProjectTask } from "./projectTask";
+import type { ProjectTaskOutput } from "./projectTaskOutput";
 
 export interface ProjectResponse {
   /** Project repository information */
@@ -19,5 +19,5 @@ export interface ProjectResponse {
   /** List of users in the project */
   users: ProjectUser[];
   /** List of tasks in the project */
-  tasks: ProjectTask[];
+  tasks: ProjectTaskOutput[];
 }

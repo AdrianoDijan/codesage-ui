@@ -7,6 +7,7 @@
 
 export type ProjectRole = typeof ProjectRole[keyof typeof ProjectRole];
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ProjectRole = {
   owner: "owner",
   collaborator: "collaborator",

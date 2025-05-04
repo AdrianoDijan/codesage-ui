@@ -5,17 +5,16 @@ import { Routes, Route } from "react-router";
 import Login from "./pages/login";
 import Logout from "./pages/logout";
 import { ProtectedRoute } from "./lib/auth";
-import TestPage from "./pages/test";
 import MainLayout from "./layouts/SidebarLayout";
-import Account from "./pages/account";
+import AccountPage from "./pages/account";
+import LoginPage from "./pages/login";
+import HomePage from "./pages/homepage";
+import ProjectPage from "./pages/project";
 
 function App() {
   return (
     <Routes>
-      {/* Routes without sidebar */}
       <Route path="/login" element={<Login />} />
-
-      {/* Protected routes with sidebar */}
       <Route
         element={
           <ProtectedRoute>
@@ -23,10 +22,11 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/" element={<TestPage />} />
-        <Route path="/test" element={<TestPage />} />
+        <Route path="/" element={<HomePage />} />
+        <Route path="/projects/:projectId" element={<ProjectPage />} />
         <Route path="/logout" element={<Logout />} />
-        <Route path="/account" element={<Account />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/account" element={<AccountPage />} />
       </Route>
     </Routes>
   );

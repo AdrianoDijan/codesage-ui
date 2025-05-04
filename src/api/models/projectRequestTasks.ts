@@ -4,9 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
-import type { ProjectTask } from "./projectTask";
+import type { ProjectTaskInput } from "./projectTaskInput";
 
 /**
  * List of tasks in the project
  */
-export type ProjectRequestTasks = ProjectTask[] | null;
+export type ProjectRequestTasks = ProjectTaskInput[] | null;

@@ -7,6 +7,7 @@
 
 export type TaskType = typeof TaskType[keyof typeof TaskType];
 
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const TaskType = {
   initial_scan: "initial_scan",
   chat: "chat",

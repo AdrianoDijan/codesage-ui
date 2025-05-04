@@ -5,4 +5,4 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type BaseMessageContentAnyOfItemAnyOf = { [key: string]: unknown };
+export type BaseMessageContentAnyOfItemAnyOf = Record<string, unknown>;
