@@ -4,10 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
+import type { InterruptResolutionSchema } from "./interruptResolutionSchema";
 
 export interface InterruptResolutionRequest {
-  /** Task interrupt identifier */
-  interrupt_id: string;
-  /** Tool call response */
-  response: string;
+  /** Interrupt resolution data */
+  resolution: InterruptResolutionSchema;
 }

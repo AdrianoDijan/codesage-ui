@@ -5,9 +5,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type Status = typeof Status[keyof typeof Status];
+export type Status = (typeof Status)[keyof typeof Status];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Status = {
   success: "success",
   error: "error",

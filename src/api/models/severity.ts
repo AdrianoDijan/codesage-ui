@@ -5,9 +5,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type Severity = typeof Severity[keyof typeof Severity];
+export type Severity = (typeof Severity)[keyof typeof Severity];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const Severity = {
   low: "low",
   medium: "medium",

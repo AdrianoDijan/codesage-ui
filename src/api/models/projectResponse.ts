@@ -4,20 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
-import type { ProjectRepository } from "./projectRepository";
-import type { ProjectUser } from "./projectUser";
-import type { ProjectTaskOutput } from "./projectTaskOutput";
+import type { ProjectSchema } from "./projectSchema";
 
 export interface ProjectResponse {
-  /** Project repository information */
-  repository: ProjectRepository;
-  created_at: string;
-  /** Project identifier */
-  id: string;
-  /** Project name */
-  name: string;
-  /** List of users in the project */
-  users: ProjectUser[];
-  /** List of tasks in the project */
-  tasks: ProjectTaskOutput[];
+  /** Project data */
+  project: ProjectSchema;
 }

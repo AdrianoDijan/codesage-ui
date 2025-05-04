@@ -6,9 +6,8 @@
  */
 
 export type ProgrammingLanguage =
-  typeof ProgrammingLanguage[keyof typeof ProgrammingLanguage];
+  (typeof ProgrammingLanguage)[keyof typeof ProgrammingLanguage];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ProgrammingLanguage = {
   cpp: "cpp",
   go: "go",

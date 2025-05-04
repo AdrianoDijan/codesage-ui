@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { PasswordChangeDialog } from "@/components/password-dialog";
+import { PasswordChangeDialog } from "@/pages/account/components/password-dialog";
 
 export function SecurityCard() {
   return (

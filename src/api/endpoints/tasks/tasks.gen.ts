@@ -24,10 +24,11 @@ import * as axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
+  BaseErrorResponse,
   HTTPValidationError,
   InterruptResolutionRequest,
-  ProjectTaskRequest,
   StatusResponse,
+  TaskCreateRequest,
   TaskResponse,
   TasksResponse,
 } from "../../models";
@@ -38,31 +39,31 @@ import type {
  */
 export const createTask = (
   projectId: string,
-  projectTaskRequest: ProjectTaskRequest,
-  options?: AxiosRequestConfig
+  taskCreateRequest: TaskCreateRequest,
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<TaskResponse>> => {
   return axios.default.post(
     `/api/projects/${projectId}/tasks`,
-    projectTaskRequest,
-    options
+    taskCreateRequest,
+    options,
   );
 };
 
 export const getCreateTaskMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createTask>>,
     TError,
-    { projectId: string; data: ProjectTaskRequest },
+    { projectId: string; data: TaskCreateRequest },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createTask>>,
   TError,
-  { projectId: string; data: ProjectTaskRequest },
+  { projectId: string; data: TaskCreateRequest },
   TContext
 > => {
   const mutationKey = ["createTask"];
@@ -76,7 +77,7 @@ export const getCreateTaskMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createTask>>,
-    { projectId: string; data: ProjectTaskRequest }
+    { projectId: string; data: TaskCreateRequest }
   > = (props) => {
     const { projectId, data } = props ?? {};
 
@@ -89,30 +90,32 @@ export const getCreateTaskMutationOptions = <
 export type CreateTaskMutationResult = NonNullable<
   Awaited<ReturnType<typeof createTask>>
 >;
-export type CreateTaskMutationBody = ProjectTaskRequest;
-export type CreateTaskMutationError = AxiosError<HTTPValidationError>;
+export type CreateTaskMutationBody = TaskCreateRequest;
+export type CreateTaskMutationError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 /**
  * @summary Create Task
  */
 export const useCreateTask = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof createTask>>,
       TError,
-      { projectId: string; data: ProjectTaskRequest },
+      { projectId: string; data: TaskCreateRequest },
       TContext
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof createTask>>,
   TError,
-  { projectId: string; data: ProjectTaskRequest },
+  { projectId: string; data: TaskCreateRequest },
   TContext
 > => {
   const mutationOptions = getCreateTaskMutationOptions(options);
@@ -125,7 +128,7 @@ export const useCreateTask = <
  */
 export const getTasks = (
   projectId: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<TasksResponse>> => {
   return axios.default.get(`/api/projects/${projectId}/tasks`, options);
 };
@@ -136,7 +139,7 @@ export const getGetTasksQueryKey = (projectId: string) => {
 
 export const getGetTasksQueryOptions = <
   TData = Awaited<ReturnType<typeof getTasks>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -144,7 +147,7 @@ export const getGetTasksQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getTasks>>, TError, TData>
     >;
     axios?: AxiosRequestConfig;
-  }
+  },
 ) => {
   const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
@@ -167,11 +170,13 @@ export const getGetTasksQueryOptions = <
 export type GetTasksQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTasks>>
 >;
-export type GetTasksQueryError = AxiosError<HTTPValidationError>;
+export type GetTasksQueryError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 export function useGetTasks<
   TData = Awaited<ReturnType<typeof getTasks>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   options: {
@@ -188,13 +193,13 @@ export function useGetTasks<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetTasks<
   TData = Awaited<ReturnType<typeof getTasks>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -211,13 +216,13 @@ export function useGetTasks<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetTasks<
   TData = Awaited<ReturnType<typeof getTasks>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -226,7 +231,7 @@ export function useGetTasks<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -236,7 +241,7 @@ export function useGetTasks<
 
 export function useGetTasks<
   TData = Awaited<ReturnType<typeof getTasks>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -245,7 +250,7 @@ export function useGetTasks<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -268,11 +273,11 @@ export function useGetTasks<
 export const getTask = (
   projectId: string,
   taskId: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<TaskResponse>> => {
   return axios.default.get(
     `/api/projects/${projectId}/tasks/${taskId}`,
-    options
+    options,
   );
 };
 
@@ -282,7 +287,7 @@ export const getGetTaskQueryKey = (projectId: string, taskId: string) => {
 
 export const getGetTaskQueryOptions = <
   TData = Awaited<ReturnType<typeof getTask>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   taskId: string,
@@ -291,7 +296,7 @@ export const getGetTaskQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getTask>>, TError, TData>
     >;
     axios?: AxiosRequestConfig;
-  }
+  },
 ) => {
   const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
@@ -315,11 +320,13 @@ export const getGetTaskQueryOptions = <
 export type GetTaskQueryResult = NonNullable<
   Awaited<ReturnType<typeof getTask>>
 >;
-export type GetTaskQueryError = AxiosError<HTTPValidationError>;
+export type GetTaskQueryError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 export function useGetTask<
   TData = Awaited<ReturnType<typeof getTask>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   taskId: string,
@@ -337,13 +344,13 @@ export function useGetTask<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetTask<
   TData = Awaited<ReturnType<typeof getTask>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   taskId: string,
@@ -361,13 +368,13 @@ export function useGetTask<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetTask<
   TData = Awaited<ReturnType<typeof getTask>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   taskId: string,
@@ -377,7 +384,7 @@ export function useGetTask<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -387,7 +394,7 @@ export function useGetTask<
 
 export function useGetTask<
   TData = Awaited<ReturnType<typeof getTask>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   projectId: string,
   taskId: string,
@@ -397,7 +404,7 @@ export function useGetTask<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -421,18 +428,18 @@ export const updateTask = (
   projectId: string,
   taskId: string,
   interruptResolutionRequest: InterruptResolutionRequest,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<StatusResponse>> => {
   return axios.default.patch(
     `/api/projects/${projectId}/tasks/${taskId}`,
     interruptResolutionRequest,
-    options
+    options,
   );
 };
 
 export const getUpdateTaskMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateTask>>,
@@ -472,14 +479,16 @@ export type UpdateTaskMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateTask>>
 >;
 export type UpdateTaskMutationBody = InterruptResolutionRequest;
-export type UpdateTaskMutationError = AxiosError<HTTPValidationError>;
+export type UpdateTaskMutationError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 /**
  * @summary Update Task
  */
 export const useUpdateTask = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -490,7 +499,7 @@ export const useUpdateTask = <
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateTask>>,
   TError,

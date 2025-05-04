@@ -16,9 +16,10 @@ import * as axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
+  BaseErrorResponse,
   BodyLoginApiTokenPost,
   HTTPValidationError,
-  Token,
+  TokenSchemaOutput,
 } from "../../models";
 
 /**
@@ -26,8 +27,8 @@ import type {
  */
 export const login = (
   bodyLoginApiTokenPost: BodyLoginApiTokenPost,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<Token>> => {
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<TokenSchemaOutput>> => {
   const formUrlEncoded = new URLSearchParams();
   if (
     bodyLoginApiTokenPost.grant_type !== undefined &&
@@ -73,8 +74,8 @@ export const login = (
 };
 
 export const getLoginMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof login>>,
@@ -114,14 +115,16 @@ export type LoginMutationResult = NonNullable<
   Awaited<ReturnType<typeof login>>
 >;
 export type LoginMutationBody = BodyLoginApiTokenPost;
-export type LoginMutationError = AxiosError<HTTPValidationError>;
+export type LoginMutationError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 /**
  * @summary Login
  */
 export const useLogin = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -132,7 +135,7 @@ export const useLogin = <
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof login>>,
   TError,

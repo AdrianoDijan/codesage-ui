@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { NavUser } from "../nav-user";
+import { NavUser } from "../../layouts/sidebar/nav-user";
 
 const meta: Meta<typeof NavUser> = {
   title: "Components/NavUser",

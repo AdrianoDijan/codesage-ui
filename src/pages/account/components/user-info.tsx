@@ -24,6 +24,7 @@ import { useEffect } from "react";
 import { useGetUserInfo } from "@/api/endpoints/users/users.gen";
 import { useUpdateUserInfo } from "@/api/endpoints/users/users.gen";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 const formSchema = z.object({
   first_name: z.string().nonempty(),
@@ -40,7 +41,15 @@ export function UserInfoCard() {
   const updateUser = useUpdateUserInfo({
     mutation: {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: ["/api/users/me"] });
+        queryClient
+          .invalidateQueries({ queryKey: ["/api/users/me"] })
+          .catch((e: unknown) => {
+            console.error(e);
+          });
+        setTimeout(() => {
+          updateUser.reset();
+        }, 2000);
+        toast.success("User information updated successfully");
       },
     },
   });
@@ -48,9 +57,9 @@ export function UserInfoCard() {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      first_name: user.data?.data.first_name ?? "",
-      last_name: user.data?.data.last_name ?? "",
-      email: user.data?.data.email ?? "",
+      first_name: user.data?.data.user.first_name ?? "",
+      last_name: user.data?.data.user.last_name ?? "",
+      email: user.data?.data.user.email ?? "",
     },
     mode: "onChange",
   });
@@ -58,9 +67,9 @@ export function UserInfoCard() {
   useEffect(() => {
     if (user.data) {
       form.reset({
-        first_name: user.data.data.first_name ?? "",
-        last_name: user.data.data.last_name ?? "",
-        email: user.data.data.email,
+        first_name: user.data.data.user.first_name ?? "",
+        last_name: user.data.data.user.last_name ?? "",
+        email: user.data.data.user.email,
       });
     }
   }, [user.data, form]);
@@ -77,7 +86,13 @@ export function UserInfoCard() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit((data) => {
-              updateUser.mutateAsync({ userId: "me", data });
+              updateUser
+                .mutateAsync({ userId: "me", data: { user: data } })
+                .catch((error: unknown) => {
+                  console.error(error);
+                  updateUser.reset();
+                  toast.error("Failed to update user information");
+                });
             })}
           >
             <div className="grid gap-4">
@@ -133,7 +148,7 @@ export function UserInfoCard() {
                 <Input
                   id="username"
                   name="username"
-                  defaultValue={user.data?.data.username ?? ""}
+                  defaultValue={user.data?.data.user.username ?? ""}
                   disabled
                 />
                 <p className="text-xs text-muted-foreground">
@@ -149,10 +164,10 @@ export function UserInfoCard() {
                   updateUser.isPending
                     ? "loading"
                     : updateUser.isSuccess
-                    ? "success"
-                    : updateUser.isError
-                    ? "error"
-                    : "default"
+                      ? "success"
+                      : updateUser.isError
+                        ? "error"
+                        : "default"
                 }
               >
                 Save

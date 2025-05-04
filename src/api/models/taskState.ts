@@ -5,9 +5,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type TaskState = typeof TaskState[keyof typeof TaskState];
+export type TaskState = (typeof TaskState)[keyof typeof TaskState];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const TaskState = {
   pending: "pending",
   running: "running",

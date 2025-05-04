@@ -7,5 +7,6 @@
 import type { Status } from "./status";
 
 export interface StatusResponse {
+  /** The status of the response. */
   status: Status;
 }

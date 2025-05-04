@@ -24,9 +24,12 @@ import * as axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
+  CreateIntegrationBindingRequest,
   CreateProjectRequest,
-  CreateProjectResponse,
+  GetIntegrationBindingCandidatesParams,
   HTTPValidationError,
+  IntegrationBindingCandidatesResponse,
+  IntegrationBindingsResponse,
   ProjectResponse,
   StatusResponse,
 } from "../../models";
@@ -37,14 +40,14 @@ import type {
  */
 export const createProject = (
   createProjectRequest: CreateProjectRequest,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<CreateProjectResponse>> => {
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<ProjectResponse>> => {
   return axios.default.post(`/api/projects`, createProjectRequest, options);
 };
 
 export const getCreateProjectMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createProject>>,
@@ -84,14 +87,16 @@ export type CreateProjectMutationResult = NonNullable<
   Awaited<ReturnType<typeof createProject>>
 >;
 export type CreateProjectMutationBody = CreateProjectRequest;
-export type CreateProjectMutationError = AxiosError<HTTPValidationError>;
+export type CreateProjectMutationError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
 
 /**
  * @summary Create Project
  */
 export const useCreateProject = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -102,7 +107,7 @@ export const useCreateProject = <
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof createProject>>,
   TError,
@@ -119,14 +124,14 @@ export const useCreateProject = <
  */
 export const deleteProject = (
   projectId: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<StatusResponse>> => {
   return axios.default.delete(`/api/projects/${projectId}`, options);
 };
 
 export const getDeleteProjectMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof deleteProject>>,
@@ -166,14 +171,16 @@ export type DeleteProjectMutationResult = NonNullable<
   Awaited<ReturnType<typeof deleteProject>>
 >;
 
-export type DeleteProjectMutationError = AxiosError<HTTPValidationError>;
+export type DeleteProjectMutationError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
 
 /**
  * @summary Delete Project
  */
 export const useDeleteProject = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
@@ -184,7 +191,7 @@ export const useDeleteProject = <
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof deleteProject>>,
   TError,
@@ -201,7 +208,7 @@ export const useDeleteProject = <
  */
 export const getProject = (
   projectId: string,
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<ProjectResponse>> => {
   return axios.default.get(`/api/projects/${projectId}`, options);
 };
@@ -212,7 +219,7 @@ export const getGetProjectQueryKey = (projectId: string) => {
 
 export const getGetProjectQueryOptions = <
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -220,7 +227,7 @@ export const getGetProjectQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getProject>>, TError, TData>
     >;
     axios?: AxiosRequestConfig;
-  }
+  },
 ) => {
   const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
@@ -245,11 +252,13 @@ export const getGetProjectQueryOptions = <
 export type GetProjectQueryResult = NonNullable<
   Awaited<ReturnType<typeof getProject>>
 >;
-export type GetProjectQueryError = AxiosError<HTTPValidationError>;
+export type GetProjectQueryError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
 
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
 >(
   projectId: string,
   options: {
@@ -266,13 +275,13 @@ export function useGetProject<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -289,13 +298,13 @@ export function useGetProject<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -304,7 +313,7 @@ export function useGetProject<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -314,7 +323,7 @@ export function useGetProject<
 
 export function useGetProject<
   TData = Awaited<ReturnType<typeof getProject>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
 >(
   projectId: string,
   options?: {
@@ -323,11 +332,466 @@ export function useGetProject<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetProjectQueryOptions(projectId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Create a new integration binding.
+ * @summary Create Integration Binding
+ */
+export const createIntegrationBinding = (
+  projectId: string,
+  createIntegrationBindingRequest: CreateIntegrationBindingRequest,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<IntegrationBindingsResponse>> => {
+  return axios.default.post(
+    `/api/projects/${projectId}/integration-bindings`,
+    createIntegrationBindingRequest,
+    options,
+  );
+};
+
+export const getCreateIntegrationBindingMutationOptions = <
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createIntegrationBinding>>,
+    TError,
+    { projectId: string; data: CreateIntegrationBindingRequest },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createIntegrationBinding>>,
+  TError,
+  { projectId: string; data: CreateIntegrationBindingRequest },
+  TContext
+> => {
+  const mutationKey = ["createIntegrationBinding"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createIntegrationBinding>>,
+    { projectId: string; data: CreateIntegrationBindingRequest }
+  > = (props) => {
+    const { projectId, data } = props ?? {};
+
+    return createIntegrationBinding(projectId, data, axiosOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateIntegrationBindingMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createIntegrationBinding>>
+>;
+export type CreateIntegrationBindingMutationBody =
+  CreateIntegrationBindingRequest;
+export type CreateIntegrationBindingMutationError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
+
+/**
+ * @summary Create Integration Binding
+ */
+export const useCreateIntegrationBinding = <
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof createIntegrationBinding>>,
+      TError,
+      { projectId: string; data: CreateIntegrationBindingRequest },
+      TContext
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof createIntegrationBinding>>,
+  TError,
+  { projectId: string; data: CreateIntegrationBindingRequest },
+  TContext
+> => {
+  const mutationOptions = getCreateIntegrationBindingMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * Get all integration bindings for a project.
+ * @summary Get Integration Bindings
+ */
+export const getIntegrationBindings = (
+  projectId: string,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<IntegrationBindingsResponse>> => {
+  return axios.default.get(
+    `/api/projects/${projectId}/integration-bindings`,
+    options,
+  );
+};
+
+export const getGetIntegrationBindingsQueryKey = (projectId: string) => {
+  return [`/api/projects/${projectId}/integration-bindings`] as const;
+};
+
+export const getGetIntegrationBindingsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getIntegrationBindings>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindings>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+) => {
+  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ?? getGetIntegrationBindingsQueryKey(projectId);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getIntegrationBindings>>
+  > = ({ signal }) =>
+    getIntegrationBindings(projectId, { signal, ...axiosOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!projectId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getIntegrationBindings>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetIntegrationBindingsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getIntegrationBindings>>
+>;
+export type GetIntegrationBindingsQueryError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
+
+export function useGetIntegrationBindings<
+  TData = Awaited<ReturnType<typeof getIntegrationBindings>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrationBindings>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrationBindings>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrationBindings<
+  TData = Awaited<ReturnType<typeof getIntegrationBindings>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindings>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrationBindings>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrationBindings>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrationBindings<
+  TData = Awaited<ReturnType<typeof getIntegrationBindings>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindings>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Integration Bindings
+ */
+
+export function useGetIntegrationBindings<
+  TData = Awaited<ReturnType<typeof getIntegrationBindings>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindings>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetIntegrationBindingsQueryOptions(
+    projectId,
+    options,
+  );
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Get all integration binding candidates for a project.
+ * @summary Get Integration Binding Candidates
+ */
+export const getIntegrationBindingCandidates = (
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<IntegrationBindingCandidatesResponse>> => {
+  return axios.default.get(`/api/projects/${projectId}/binding-candidates`, {
+    ...options,
+    params: { ...params, ...options?.params },
+  });
+};
+
+export const getGetIntegrationBindingCandidatesQueryKey = (
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+) => {
+  return [
+    `/api/projects/${projectId}/binding-candidates`,
+    ...(params ? [params] : []),
+  ] as const;
+};
+
+export const getGetIntegrationBindingCandidatesQueryOptions = <
+  TData = Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+) => {
+  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+  const queryKey =
+    queryOptions?.queryKey ??
+    getGetIntegrationBindingCandidatesQueryKey(projectId, params);
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof getIntegrationBindingCandidates>>
+  > = ({ signal }) =>
+    getIntegrationBindingCandidates(projectId, params, {
+      signal,
+      ...axiosOptions,
+    });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!projectId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetIntegrationBindingCandidatesQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getIntegrationBindingCandidates>>
+>;
+export type GetIntegrationBindingCandidatesQueryError = AxiosError<
+  StatusResponse | HTTPValidationError
+>;
+
+export function useGetIntegrationBindingCandidates<
+  TData = Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrationBindingCandidates>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrationBindingCandidates<
+  TData = Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrationBindingCandidates>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrationBindingCandidates<
+  TData = Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Integration Binding Candidates
+ */
+
+export function useGetIntegrationBindingCandidates<
+  TData = Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+  TError = AxiosError<StatusResponse | HTTPValidationError>,
+>(
+  projectId: string,
+  params: GetIntegrationBindingCandidatesParams,
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrationBindingCandidates>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetIntegrationBindingCandidatesQueryOptions(
+    projectId,
+    params,
+    options,
+  );
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

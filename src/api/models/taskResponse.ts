@@ -4,9 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
-import type { ProjectTaskOutput } from "./projectTaskOutput";
+import type { ProjectTaskSchema } from "./projectTaskSchema";
 
 export interface TaskResponse {
   /** Task information */
-  task: ProjectTaskOutput;
+  task: ProjectTaskSchema;
 }

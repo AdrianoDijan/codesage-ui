@@ -3,12 +3,11 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Link } from "react-router";
 
 interface ProjectErrorProps {
-  error: Error | unknown;
+  error: Error;
 }
 
 export function ProjectError({ error }: ProjectErrorProps) {
-  const errorMessage =
-    error instanceof Error ? error.message : "Unknown error occurred";
+  const errorMessage = error.message;
 
   return (
     <div className="container mx-auto max-w-7xl">

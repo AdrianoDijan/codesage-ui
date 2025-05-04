@@ -10,10 +10,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Code, ExternalLink, FolderGit2, Plus } from "lucide-react";
+import {
+  Code,
+  ExternalLink,
+  FolderGit2,
+  Plus,
+  ChevronRight,
+} from "lucide-react";
 import { Link } from "react-router";
-import { ProjectResponse } from "@/api/models";
-import { ProjectCreationDialog } from "@/components/project-creation-dialog";
+import { ProjectSchema } from "@/api/models";
+import { ProjectCreationDialog } from "@/components/projects/project-creation-dialog";
 
 export function ProjectsList() {
   const { data: projectsData, isLoading: isLoadingProjects } =
@@ -35,16 +41,28 @@ export function ProjectsList() {
 
       {isLoadingProjects ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <ProjectCardSkeleton key={i} />
+          {[1, 2, 3].map((value) => (
+            <ProjectCardSkeleton key={value} />
           ))}
         </div>
       ) : projectsData?.data.projects.length ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projectsData.data.projects.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {projectsData.data.projects.slice(0, 3).map((project) => (
+              <ProjectCard key={project.id} project={project} />
+            ))}
+          </div>
+          {projectsData.data.projects.length > 3 && (
+            <div className="mt-4 text-center">
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/projects" className="flex items-center">
+                  Show All Projects
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          )}
+        </>
       ) : (
         <EmptyProjectsState />
       )}
@@ -104,7 +122,7 @@ function EmptyProjectsState() {
   );
 }
 
-function ProjectCard({ project }: { project: ProjectResponse }) {
+function ProjectCard({ project }: { project: ProjectSchema }) {
   return (
     <Card className="flex flex-col h-full">
       <CardHeader>
@@ -113,7 +131,7 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
           <CardTitle className="truncate text-lg">{project.name}</CardTitle>
         </div>
         <CardDescription className="truncate text-xs">
-          {project.repository.url}
+          {project.repository?.remote.urls[0]}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex-1">
@@ -127,8 +145,11 @@ function ProjectCard({ project }: { project: ProjectResponse }) {
           </div>
           {project.users.length > 0 && (
             <div className="flex -space-x-2">
-              {project.users.slice(0, 3).map((user, i) => (
-                <Avatar key={i} className="h-6 w-6 border-2 border-background">
+              {project.users.slice(0, 3).map((user) => (
+                <Avatar
+                  key={user.user.id}
+                  className="h-6 w-6 border-2 border-background"
+                >
                   <AvatarFallback className="text-xs">
                     {user.user.username.substring(0, 2).toUpperCase()}
                   </AvatarFallback>

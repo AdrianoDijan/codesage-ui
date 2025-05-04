@@ -1,25 +1,52 @@
-import LoginPage from "@/pages/login";
-import { ReactNode } from "react";
-
-export const isAuthenticated = (): boolean => {
-  const accessToken = localStorage.getItem("accessToken");
-  return !!accessToken;
-};
-
-export const logout = (): void => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-  window.location.href = "/";
-};
+import { LoginModal } from "@/components/auth/login-modal";
+import { ReactNode, useState, useEffect } from "react";
+import { isAuthenticated, useAuthStateListener } from "@/lib/auth/auth-service";
 
 interface ProtectedRouteProps {
   children: ReactNode;
 }
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  if (!isAuthenticated()) {
-    return <LoginPage />;
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [authenticated, setAuthenticated] = useState<boolean | null>(null);
+
+  const checkAuth = () => {
+    const isAuth = isAuthenticated();
+    setAuthenticated(isAuth);
+
+    if (!isAuth) {
+      setIsLoginModalOpen(true);
+    } else {
+      setIsLoginModalOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    // Check authentication on mount
+    checkAuth();
+  }, []);
+
+  // Listen for authentication state changes
+  useAuthStateListener(checkAuth);
+
+  // While initial check is happening, show nothing
+  if (authenticated === null) {
+    return null;
   }
 
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => {
+          // Only allow closing if authenticated
+          if (isAuthenticated()) {
+            setIsLoginModalOpen(false);
+          }
+        }}
+      />
+    </>
+  );
 };

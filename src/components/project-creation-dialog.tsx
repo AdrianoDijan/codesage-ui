@@ -26,6 +26,8 @@ import StateButton from "@/components/state-button";
 import { useCreateProject } from "@/api/endpoints/project/project.gen";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useQueryClient } from "@tanstack/react-query";
+import { CreateProjectRequest, HTTPValidationError } from "@/api/models";
+import { AxiosError } from "axios";
 
 const projectFormSchema = z
   .object({
@@ -35,7 +37,7 @@ const projectFormSchema = z
       .url("Must be a valid URL"),
     name: z.string().optional(),
     reference: z.string().optional(),
-    useCredentials: z.boolean().default(false),
+    useCredentials: z.boolean(),
     username: z.string().optional(),
     password: z.string().optional(),
   })
@@ -50,7 +52,7 @@ const projectFormSchema = z
     {
       message: "Username and password are required when using credentials",
       path: ["username"],
-    }
+    },
   );
 
 export type ProjectFormData = z.infer<typeof projectFormSchema>;
@@ -69,22 +71,19 @@ export function ProjectCreationDialog({
 
   const form = useForm<ProjectFormData>({
     resolver: zodResolver(projectFormSchema),
-    defaultValues: {
-      repositoryUrl: "",
-      name: "",
-      reference: "",
-      useCredentials: false,
-      username: "",
-      password: "",
-    },
     mode: "onChange",
+    defaultValues: {
+      useCredentials: false,
+    },
   });
 
   const createProject = useCreateProject({
     mutation: {
-      onSuccess: () => {
+      onSuccess: async () => {
         // Invalidate the projects query to refresh the projects list
-        queryClient.invalidateQueries({ queryKey: ["/api/users/me/projects"] });
+        await queryClient.invalidateQueries({
+          queryKey: ["/api/users/me/projects"],
+        });
 
         toast.success("Project created successfully");
         setTimeout(() => {
@@ -95,12 +94,16 @@ export function ProjectCreationDialog({
           }
         }, 2000);
       },
-      onError: (error) => {
-        const axiosError = error;
-        const errorMessage = axiosError.response?.data.detail
-          ? String(axiosError.response.data.detail)
-          : axiosError.message ?? "Failed to create project";
-        toast.error(errorMessage);
+      onError: (error: AxiosError<HTTPValidationError>) => {
+        if (error.response?.data.detail) {
+          toast.error(
+            Array.isArray(error.response.data.detail)
+              ? error.response.data.detail.map(String).join(", ")
+              : String(error.response.data.detail),
+          );
+        } else {
+          toast.error(error.message || "Failed to create project");
+        }
       },
     },
   });
@@ -115,19 +118,19 @@ export function ProjectCreationDialog({
   }, [open, form]);
 
   const onSubmit = (data: ProjectFormData) => {
-    const projectRequest = {
+    const projectRequest: CreateProjectRequest = {
       project: {
         repository: {
           url: data.repositoryUrl,
-          reference: data.reference || null,
+          reference: data.reference ?? null,
           credentials: data.useCredentials
             ? {
-                username: data.username!,
-                password: data.password!,
+                username: data.username ?? "",
+                password: data.password ?? "",
               }
             : null,
         },
-        name: data.name || null,
+        name: data.name ?? null,
       },
     };
 
@@ -267,10 +270,10 @@ export function ProjectCreationDialog({
                   createProject.isPending
                     ? "loading"
                     : createProject.isSuccess
-                    ? "success"
-                    : createProject.isError
-                    ? "error"
-                    : "default"
+                      ? "success"
+                      : createProject.isError
+                        ? "error"
+                        : "default"
                 }
               >
                 Create Project

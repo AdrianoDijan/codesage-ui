@@ -16,6 +16,8 @@ import StateButton from "@/components/state-button";
 import { useNavigate } from "react-router";
 import { useLogin } from "@/api/endpoints/authentication/authentication.gen";
 import { toast } from "sonner";
+import { storeTokens } from "@/lib/auth/auth-service";
+import { getErrorMessage as getErrorMessage } from "@/lib/error";
 
 export const LoginFormSchema = z.object({
   username: z.string().nonempty(),
@@ -23,10 +25,15 @@ export const LoginFormSchema = z.object({
   grant_type: z.literal("password").optional().default("password"),
 });
 
+interface LoginFormProps extends React.ComponentPropsWithoutRef<"div"> {
+  onSuccessfulLogin?: () => void;
+}
+
 export function LoginForm({
   className,
+  onSuccessfulLogin,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: LoginFormProps) {
   const form = useForm({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: {
@@ -40,17 +47,19 @@ export function LoginForm({
   const login = useLogin({
     mutation: {
       onSuccess: (data) => {
-        void navigate(0);
-
-        localStorage.setItem("accessToken", data.data.access_token);
-        localStorage.setItem("refreshToken", data.data.refresh_token);
+        storeTokens(data.data.access_token, data.data.refresh_token);
         toast.success("Login successful");
+
+        if (onSuccessfulLogin) {
+          onSuccessfulLogin();
+        } else {
+          void navigate(0);
+        }
       },
       onError: (error) => {
-        const errorMessage = error.response?.data.detail ?? error.message;
-        toast.error(
-          Array.isArray(errorMessage) ? errorMessage.join("\n") : errorMessage
-        );
+        const errorMessage = getErrorMessage(error);
+
+        toast.error(errorMessage);
         login.reset();
       },
     },
@@ -117,10 +126,10 @@ export function LoginForm({
                   login.isPending
                     ? "loading"
                     : login.isSuccess
-                    ? "success"
-                    : login.isError
-                    ? "error"
-                    : "default"
+                      ? "success"
+                      : login.isError
+                        ? "error"
+                        : "default"
                 }
               >
                 Login

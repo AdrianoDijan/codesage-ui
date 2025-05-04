@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
+import { useTaskStream } from "@/hooks/useTaskStream";
 import {
   Card,
   CardContent,
@@ -16,83 +17,109 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Plus,
-  PlayCircle,
-  CheckCircle,
-  ClockIcon,
-  AlertCircle,
-} from "lucide-react";
-import { ProjectTaskOutput, TaskState, TaskType } from "@/api/models";
+import { Plus, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { ProjectTaskSchema, TaskState, TaskType } from "@/api/models";
 import { useCreateTask } from "@/api/endpoints/tasks/tasks.gen";
-import { TaskDialog } from "@/components/task-dialog";
+import { TaskDialog } from "@/components/tasks/task-dialog";
 import { toast } from "sonner";
+import { taskStatusMap } from "@/lib/constants/task-status";
+import { cn } from "@/lib/utils";
+import { formatDate } from "@/lib/utils/formatting";
 
 interface ProjectTasksProps {
   projectId: string;
-  tasks: ProjectTaskOutput[];
+  tasks: ProjectTaskSchema[];
+  onRefresh?: () => void;
 }
 
-const taskStatusMap: Record<
-  TaskState,
-  {
-    label: string;
-    icon: React.JSX.Element;
-    variant: "secondary" | "default" | "destructive" | "outline";
-  }
-> = {
-  [TaskState.pending]: {
-    label: "Pending",
-    icon: <ClockIcon className="h-3 w-3" />,
-    variant: "secondary",
-  },
-  [TaskState.running]: {
-    label: "Running",
-    icon: <PlayCircle className="h-3 w-3" />,
-    variant: "default",
-  },
-  [TaskState.completed]: {
-    label: "Completed",
-    icon: <CheckCircle className="h-3 w-3" />,
-    variant: "secondary",
-  },
-  [TaskState.failed]: {
-    label: "Failed",
-    icon: <AlertCircle className="h-3 w-3" />,
-    variant: "destructive",
-  },
-  [TaskState.interrupted]: {
-    label: "Interrupted",
-    icon: <AlertCircle className="h-3 w-3" />,
-    variant: "outline",
-  },
-  [TaskState.timeout]: {
-    label: "Timeout",
-    icon: <ClockIcon className="h-3 w-3" />,
-    variant: "destructive",
-  },
-  [TaskState.cancelled]: {
-    label: "Cancelled",
-    icon: <AlertCircle className="h-3 w-3" />,
-    variant: "secondary",
-  },
-  [TaskState.waiting]: {
-    label: "Waiting",
-    icon: <ClockIcon className="h-3 w-3" />,
-    variant: "outline",
-  },
-};
+// Component for a single task row that uses the aggregated task state map
+function TaskRow({
+  task,
+  projectId,
+  onClick,
+}: {
+  task: ProjectTaskSchema;
+  projectId: string;
+  onClick: () => void;
+}) {
+  const { state: liveState, connected: isWsConnected } = useTaskStream(
+    projectId,
+    task.id,
+  );
+  const currentState = liveState ?? task.state;
+  const taskStatus = taskStatusMap[currentState];
 
-export function ProjectTasks({ projectId, tasks }: ProjectTasksProps) {
+  return (
+    <TableRow
+      onClick={onClick}
+      className="cursor-pointer hover:bg-secondary/20"
+    >
+      <TableCell className="font-medium">{task.id}</TableCell>
+      <TableCell>
+        {task.type == "initial_scan" ? "Initial scan" : task.type}
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2">
+          <Badge
+            variant={taskStatus.variant}
+            className="flex items-center gap-1 w-fit"
+          >
+            {taskStatus.icon}
+            {taskStatus.label}
+          </Badge>
+
+          {/* Show WebSocket connection status for active tasks */}
+          {(currentState === TaskState.running ||
+            currentState === TaskState.waiting ||
+            currentState === TaskState.pending) && (
+            <span className="inline-flex">
+              {isWsConnected ? (
+                <Wifi className="h-3 w-3 text-green-500" />
+              ) : (
+                <WifiOff className="h-3 w-3 text-muted-foreground" />
+              )}
+            </span>
+          )}
+        </div>
+      </TableCell>
+      <TableCell className="text-muted-foreground text-sm">
+        {formatDate(task.created_at)}
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// Wrapper component is no longer needed; we forward the live state down.
+function ConnectedTaskRow({
+  task,
+  projectId,
+  onClick,
+}: {
+  task: ProjectTaskSchema;
+  projectId: string;
+  onClick: () => void;
+}) {
+  return <TaskRow task={task} projectId={projectId} onClick={onClick} />;
+}
+
+export function ProjectTasks({
+  projectId,
+  tasks,
+  onRefresh,
+}: ProjectTasksProps) {
   const [isCreatingTask, setIsCreatingTask] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<ProjectTaskOutput | null>(null);
+  const [selectedTask, setSelectedTask] = useState<ProjectTaskSchema | null>(
+    null,
+  );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const createTask = useCreateTask({
     mutation: {
       onSuccess: () => {
         toast.success("Task created successfully");
         setIsCreatingTask(false);
+        if (onRefresh) onRefresh();
       },
       onError: (error) => {
         toast.error("Failed to create task: " + error.message);
@@ -101,30 +128,37 @@ export function ProjectTasks({ projectId, tasks }: ProjectTasksProps) {
     },
   });
 
-  const handleCreateAnalysisTask = () => {
+  const handleCreateAnalysisTask = useCallback(() => {
     setIsCreatingTask(true);
     createTask.mutate({
       projectId,
-      data: { type: TaskType.initial_scan },
+      data: { task: { type: TaskType.initial_scan } },
     });
-  };
+  }, [createTask, projectId]);
 
-  const handleTaskRowClick = (task: ProjectTaskOutput) => {
+  const handleTaskRowClick = useCallback((task: ProjectTaskSchema) => {
     setSelectedTask(task);
     setIsDialogOpen(true);
-  };
+  }, []);
 
-  // Format date for display
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(date);
-  };
+  const handleRefresh = useCallback(() => {
+    if (onRefresh) {
+      setRefreshing(true);
+      onRefresh();
+      // Reset refreshing state after a short delay
+      setTimeout(() => {
+        setRefreshing(false);
+      }, 500);
+    }
+  }, [onRefresh]);
+
+  // Determine if there are any active tasks that might change state
+  const hasActiveTasks = tasks.some(
+    (task) =>
+      task.state === TaskState.running ||
+      task.state === TaskState.waiting ||
+      task.state === TaskState.pending,
+  );
 
   return (
     <>
@@ -134,15 +168,31 @@ export function ProjectTasks({ projectId, tasks }: ProjectTasksProps) {
             <CardTitle className="text-xl">Tasks</CardTitle>
             <CardDescription>View and manage project tasks</CardDescription>
           </div>
-          <Button
-            size="sm"
-            onClick={handleCreateAnalysisTask}
-            disabled={isCreatingTask || createTask.isPending}
-            className="gap-1"
-          >
-            <Plus className="h-4 w-4" />
-            New Analysis
-          </Button>
+          <div className="flex items-center gap-2">
+            {hasActiveTasks && onRefresh && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={handleRefresh}
+                disabled={refreshing}
+                className="h-8 w-8"
+                title="Refresh tasks"
+              >
+                <RefreshCw
+                  className={cn("h-4 w-4", refreshing && "animate-spin")}
+                />
+              </Button>
+            )}
+            <Button
+              size="sm"
+              onClick={handleCreateAnalysisTask}
+              disabled={isCreatingTask || createTask.isPending}
+              className="gap-1"
+            >
+              <Plus className="h-4 w-4" />
+              New Analysis
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {tasks.length > 0 ? (
@@ -156,34 +206,16 @@ export function ProjectTasks({ projectId, tasks }: ProjectTasksProps) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {tasks.map((task) => {
-                  const taskStatus = taskStatusMap[task.state];
-
-                  return (
-                    <TableRow 
-                      key={task.id} 
-                      onClick={() => handleTaskRowClick(task)}
-                      className="cursor-pointer hover:bg-secondary/20"
-                    >
-                      <TableCell className="font-medium">
-                        {task.id}
-                      </TableCell>
-                      <TableCell>
-                        {task.type == "initial_scan" ? "Initial scan" : task.type}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={taskStatus.variant}
-                          className="flex items-center gap-1 w-fit"
-                        >
-                          {taskStatus.icon}
-                          {taskStatus.label}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">{formatDate(task.created_at)}</TableCell>
-                    </TableRow>
-                  );
-                })}
+                {tasks.map((task) => (
+                  <ConnectedTaskRow
+                    key={task.id}
+                    task={task}
+                    projectId={projectId}
+                    onClick={() => {
+                      handleTaskRowClick(task);
+                    }}
+                  />
+                ))}
               </TableBody>
             </Table>
           ) : (

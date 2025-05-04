@@ -8,27 +8,41 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import {
+  useGetProjects,
+  useGetUserInfo,
+} from "@/api/endpoints/users/users.gen";
+import { NotificationLinkSchema } from "@/api/models";
+import { useNavigate } from "react-router";
 
 export function ActivityFeed() {
-  // This would typically fetch activity data from an API
-  const activityItems = [
-    {
-      id: 1,
-      avatar: "SYS",
-      title: "System analyzed your code",
-      time: "2 hours ago in Project Alpha",
-      description: "Found 3 potential improvements in the codebase",
+  const user = useGetUserInfo("me");
+  const notifications = Array.isArray(user.data?.data.user.notifications)
+    ? user.data.data.user.notifications
+    : [];
+  const navigate = useNavigate();
+  const projectsData = useGetProjects("me");
+
+  const handleNavigate = React.useCallback(
+    async (link: NotificationLinkSchema) => {
+      if (link.type === "task") {
+        if (projectsData.data?.data.projects) {
+          for (const project of projectsData.data.data.projects) {
+            const taskMatch = project.tasks.find((task) => task.id === link.id);
+            if (taskMatch) {
+              await navigate(`/projects/${project.id}/tasks/${link.id}`);
+              return;
+            }
+          }
+        }
+        await navigate(`/${link.type}/${link.id}`);
+      } else {
+        await navigate(`/${link.type}/${link.id}`);
+      }
     },
-    {
-      id: 2,
-      avatar: "TM",
-      title: "Team Member added you to a project",
-      time: "Yesterday",
-      description: "You were added to Project Beta",
-    },
-  ];
+    [navigate, projectsData],
+  );
 
   return (
     <div>
@@ -42,19 +56,32 @@ export function ActivityFeed() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
-            {activityItems.map((item, index) => (
+            {notifications.map((item, index) => (
               <React.Fragment key={item.id}>
-                <div className="flex items-start space-x-4">
-                  <Avatar>
-                    <AvatarFallback>{item.avatar}</AvatarFallback>
-                  </Avatar>
-                  <div className="space-y-1">
-                    <p className="text-sm font-medium">{item.title}</p>
-                    <p className="text-xs text-muted-foreground">{item.time}</p>
-                    <p className="text-sm">{item.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <p className="text-sm font-medium">{item.text}</p>
+                    <span className="text-xs px-2 py-1 rounded-full bg-muted text-muted-foreground">
+                      {item.notification_type}
+                    </span>
                   </div>
+                  {item.link && (
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-xs text-muted-foreground hover:text-primary"
+                      onClick={() => {
+                        if (item.link)
+                          handleNavigate(item.link).catch((error: unknown) => {
+                            console.error(error);
+                          });
+                      }}
+                    >
+                      Go to {item.link.type === "task" ? "Task" : "Project"}
+                    </Button>
+                  )}
                 </div>
-                {index < activityItems.length - 1 && <Separator />}
+                {index < notifications.length - 1 && <Separator />}
               </React.Fragment>
             ))}
           </div>

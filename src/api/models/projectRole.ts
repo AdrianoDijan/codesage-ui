@@ -5,9 +5,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type ProjectRole = typeof ProjectRole[keyof typeof ProjectRole];
+export type ProjectRole = (typeof ProjectRole)[keyof typeof ProjectRole];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const ProjectRole = {
   owner: "owner",
   collaborator: "collaborator",

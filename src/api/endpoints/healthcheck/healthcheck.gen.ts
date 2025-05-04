@@ -27,7 +27,7 @@ import type { PingAuthResponse, PingResponse } from "../../models";
  * @summary Ping
  */
 export const ping = (
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<PingResponse>> => {
   return axios.default.get(`/api/ping`, options);
 };
@@ -38,7 +38,7 @@ export const getPingQueryKey = () => {
 
 export const getPingQueryOptions = <
   TData = Awaited<ReturnType<typeof ping>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof ping>>, TError, TData>
@@ -65,7 +65,7 @@ export type PingQueryError = AxiosError<unknown>;
 
 export function usePing<
   TData = Awaited<ReturnType<typeof ping>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options: {
     query: Partial<
@@ -81,13 +81,13 @@ export function usePing<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function usePing<
   TData = Awaited<ReturnType<typeof ping>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -103,13 +103,13 @@ export function usePing<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function usePing<
   TData = Awaited<ReturnType<typeof ping>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -117,7 +117,7 @@ export function usePing<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -127,7 +127,7 @@ export function usePing<
 
 export function usePing<
   TData = Awaited<ReturnType<typeof ping>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -135,7 +135,7 @@ export function usePing<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -156,7 +156,7 @@ export function usePing<
  * @summary Ping Auth
  */
 export const pingAuth = (
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<PingAuthResponse>> => {
   return axios.default.get(`/api/ping-auth`, options);
 };
@@ -167,7 +167,7 @@ export const getPingAuthQueryKey = () => {
 
 export const getPingAuthQueryOptions = <
   TData = Awaited<ReturnType<typeof pingAuth>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(options?: {
   query?: Partial<
     UseQueryOptions<Awaited<ReturnType<typeof pingAuth>>, TError, TData>
@@ -196,7 +196,7 @@ export type PingAuthQueryError = AxiosError<unknown>;
 
 export function usePingAuth<
   TData = Awaited<ReturnType<typeof pingAuth>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options: {
     query: Partial<
@@ -212,13 +212,13 @@ export function usePingAuth<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function usePingAuth<
   TData = Awaited<ReturnType<typeof pingAuth>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -234,13 +234,13 @@ export function usePingAuth<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function usePingAuth<
   TData = Awaited<ReturnType<typeof pingAuth>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -248,7 +248,7 @@ export function usePingAuth<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -258,7 +258,7 @@ export function usePingAuth<
 
 export function usePingAuth<
   TData = Awaited<ReturnType<typeof pingAuth>>,
-  TError = AxiosError<unknown>
+  TError = AxiosError<unknown>,
 >(
   options?: {
     query?: Partial<
@@ -266,7 +266,7 @@ export function usePingAuth<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {

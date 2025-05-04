@@ -17,7 +17,7 @@ export function Greeting() {
     }
 
     const name =
-      userData?.data.first_name ?? userData?.data.username ?? "there";
+      userData?.data.user.first_name ?? userData?.data.user.username ?? "there";
 
     return `${greeting}, ${name}`;
   };

@@ -1,34 +1,25 @@
-import axios, { AxiosError } from "axios";
-
-const getAccessToken = () => {
-  return localStorage.getItem("accessToken");
-};
-
-const getRefreshToken = () => {
-  return localStorage.getItem("refreshToken");
-};
-
-const saveAccessToken = (token: string) => {
-  localStorage.setItem("accessToken", token);
-};
-
-const saveRefreshToken = (token: string) => {
-  localStorage.setItem("refreshToken", token);
-};
-
-const deleteTokens = () => {
-  localStorage.removeItem("accessToken");
-  localStorage.removeItem("refreshToken");
-};
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import {
+  getAccessToken,
+  getRefreshToken,
+  storeTokens,
+  clearTokens,
+} from "./auth/auth-service";
 
 interface TokenResponse {
   access_token: string;
   refresh_token: string;
 }
 
+interface ExtendedAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
+
 export const setupInterceptors = () => {
-  axios.defaults.baseURL =
-    import.meta.env.VITE_BASE_API_URL ?? "http://localhost:8080";
+  const baseURL =
+    (import.meta.env.VITE_BASE_API_URL as string | undefined) ??
+    "http://localhost:8080";
+  axios.defaults.baseURL = baseURL;
 
   axios.interceptors.request.use(
     (config) => {
@@ -45,22 +36,22 @@ export const setupInterceptors = () => {
     },
     (error) => {
       return Promise.reject(
-        new Error(error instanceof Error ? error.message : String(error))
+        new Error(error instanceof Error ? error.message : String(error)),
       );
-    }
+    },
   );
 
   axios.interceptors.response.use(
     (response) => {
       return response;
     },
-    async (error) => {
+    async (error: unknown) => {
       if (!(error instanceof AxiosError) || !error.config) {
         return Promise.reject(new Error("Unknown error occurred"));
       }
 
-      const originalRequest = error.config;
-      const hasRetryFlag = "_retry" in originalRequest;
+      const originalRequest = error.config as ExtendedAxiosRequestConfig;
+      const hasRetryFlag = originalRequest._retry === true;
 
       if (
         error.response?.status === 401 &&
@@ -72,32 +63,38 @@ export const setupInterceptors = () => {
         const refreshToken = getRefreshToken();
 
         if (!refreshToken) {
-          deleteTokens();
+          clearTokens();
           return Promise.reject(new Error("No refresh token available"));
         }
 
         try {
-          const tokenResponse = await axios.post<TokenResponse>(`/api/token`, {
-            grant_type: "refresh_token",
-            refresh_token: refreshToken,
-          });
+          // Create form-encoded data for the refresh token request
+          const formData = new URLSearchParams();
+          formData.append("grant_type", "refresh_token");
+          formData.append("refresh_token", refreshToken);
+
+          const tokenResponse = await axios.post<TokenResponse>(
+            `/api/token`,
+            formData,
+          );
 
           const accessToken = tokenResponse.data.access_token;
           const newRefreshToken = tokenResponse.data.refresh_token;
 
-          saveAccessToken(accessToken);
-          saveRefreshToken(newRefreshToken);
+          // Use the auth service to store tokens, which will notify components
+          storeTokens(accessToken, newRefreshToken);
 
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
           return await axios(originalRequest);
-        } catch (error) {
-          deleteTokens();
+        } catch {
+          // Use the auth service to clear tokens, which will notify components
+          clearTokens();
           return Promise.reject(new Error("Token refresh failed"));
         }
       }
 
       return Promise.reject(error);
-    }
+    },
   );
 };

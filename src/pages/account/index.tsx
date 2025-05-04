@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { GalleryVerticalEnd } from "lucide-react";
-import { logout } from "@/lib/auth";
+import { logout } from "@/lib/auth/auth-service";
 import { UserInfoCard } from "./components/user-info";
 import { SecurityCard } from "./components/security";
 import { IntegrationsCard } from "./components/integrations";

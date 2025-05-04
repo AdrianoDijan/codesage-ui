@@ -4,9 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
-import type { ProjectResponse } from "./projectResponse";
+import type { ProjectSchema } from "./projectSchema";
 
 export interface ProjectsResponse {
   /** List of projects */
-  projects: ProjectResponse[];
+  projects: ProjectSchema[];
 }

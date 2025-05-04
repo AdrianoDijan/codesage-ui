@@ -5,9 +5,8 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export type MessageType = typeof MessageType[keyof typeof MessageType];
+export type MessageType = (typeof MessageType)[keyof typeof MessageType];
 
-// eslint-disable-next-line @typescript-eslint/no-redeclare
 export const MessageType = {
   system: "system",
   human: "human",

@@ -8,7 +8,7 @@ import reactX from "eslint-plugin-react-x";
 import reactDom from "eslint-plugin-react-dom";
 
 export default tseslint.config(
-  { ignores: ["dist", "**/*.gen.{ts,tsx}"] },
+  { ignores: ["dist", "**/*.gen.{ts,tsx}", "src/components/ui/*.tsx"] },
   {
     extends: [
       js.configs.recommended,
@@ -46,5 +46,5 @@ export default tseslint.config(
         { checksVoidReturn: { attributes: false } },
       ],
     },
-  }
+  },
 );

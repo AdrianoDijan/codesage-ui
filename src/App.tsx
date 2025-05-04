@@ -3,13 +3,14 @@ import "./App.css";
 import { Routes, Route } from "react-router";
 
 import Login from "./pages/login";
-import Logout from "./pages/logout";
 import { ProtectedRoute } from "./lib/auth";
-import MainLayout from "./layouts/SidebarLayout";
+import MainLayout from "./layouts/sidebar";
 import AccountPage from "./pages/account";
-import LoginPage from "./pages/login";
 import HomePage from "./pages/homepage";
 import ProjectPage from "./pages/project";
+import ProjectSettingsPage from "./pages/project/settings";
+import ProjectsPage from "./pages/projects";
+import IntegrationsPage from "./pages/integrations";
 
 function App() {
   return (
@@ -23,10 +24,14 @@ function App() {
         }
       >
         <Route path="/" element={<HomePage />} />
+        <Route path="/projects" element={<ProjectsPage />} />
         <Route path="/projects/:projectId" element={<ProjectPage />} />
-        <Route path="/logout" element={<Logout />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route
+          path="/projects/:projectId/settings"
+          element={<ProjectSettingsPage />}
+        />
         <Route path="/account" element={<AccountPage />} />
+        <Route path="/integrations" element={<IntegrationsPage />} />
       </Route>
     </Routes>
   );

@@ -4,8 +4,9 @@
  * CodeSage API (dev)
  * OpenAPI spec version: 0.1.0
  */
-import type { ProjectRequest } from "./projectRequest";
+import type { ProjectCreateSchema } from "./projectCreateSchema";
 
 export interface CreateProjectRequest {
-  project: ProjectRequest;
+  /** Project to create */
+  project: ProjectCreateSchema;
 }

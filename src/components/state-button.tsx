@@ -1,6 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Check, Loader2, X } from "lucide-react";
 
+import { cn } from "@/lib/utils";
+
 export default function StateButton({
   children,
   variant = "default",
@@ -29,7 +31,7 @@ export default function StateButton({
           Success!
         </>
       );
-      buttonClassName = "bg-green-400 hover:bg-green-600";
+      buttonClassName = "bg-green-500 hover:bg-green-600";
       break;
     case "error":
       buttonContent = (
@@ -38,14 +40,14 @@ export default function StateButton({
           Error!
         </>
       );
-      buttonClassName = "bg-red-400 hover:bg-red-600";
+      buttonClassName = "bg-red-500 hover:bg-red-600";
       break;
     default:
       buttonContent = children;
   }
 
   return (
-    <Button className={`${className} ${buttonClassName}`} {...props}>
+    <Button className={cn(className, buttonClassName)} {...props}>
       {buttonContent}
     </Button>
   );

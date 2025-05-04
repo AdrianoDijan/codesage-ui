@@ -24,10 +24,14 @@ import * as axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
+  BaseErrorResponse,
   HTTPValidationError,
+  IntegrationsResponse,
+  MultipleErrorResponse,
+  NotificationUpdateRequest,
   ProjectsResponse,
-  User,
-  UserUpdate,
+  UserResponse,
+  UserUpdateRequest,
 } from "../../models";
 
 /**
@@ -36,8 +40,8 @@ import type {
  */
 export const getUserInfo = (
   userId: number | "me",
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<User>> => {
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<UserResponse>> => {
   return axios.default.get(`/api/users/${userId}`, options);
 };
 
@@ -47,7 +51,7 @@ export const getGetUserInfoQueryKey = (userId: number | "me") => {
 
 export const getGetUserInfoQueryOptions = <
   TData = Awaited<ReturnType<typeof getUserInfo>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -55,7 +59,7 @@ export const getGetUserInfoQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getUserInfo>>, TError, TData>
     >;
     axios?: AxiosRequestConfig;
-  }
+  },
 ) => {
   const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
@@ -80,11 +84,13 @@ export const getGetUserInfoQueryOptions = <
 export type GetUserInfoQueryResult = NonNullable<
   Awaited<ReturnType<typeof getUserInfo>>
 >;
-export type GetUserInfoQueryError = AxiosError<HTTPValidationError>;
+export type GetUserInfoQueryError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 export function useGetUserInfo<
   TData = Awaited<ReturnType<typeof getUserInfo>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options: {
@@ -101,13 +107,13 @@ export function useGetUserInfo<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetUserInfo<
   TData = Awaited<ReturnType<typeof getUserInfo>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -124,13 +130,13 @@ export function useGetUserInfo<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetUserInfo<
   TData = Awaited<ReturnType<typeof getUserInfo>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -139,7 +145,7 @@ export function useGetUserInfo<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -149,7 +155,7 @@ export function useGetUserInfo<
 
 export function useGetUserInfo<
   TData = Awaited<ReturnType<typeof getUserInfo>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -158,7 +164,7 @@ export function useGetUserInfo<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
@@ -180,27 +186,33 @@ export function useGetUserInfo<
  */
 export const updateUserInfo = (
   userId: number | "me",
-  userUpdate: UserUpdate,
-  options?: AxiosRequestConfig
-): Promise<AxiosResponse<User>> => {
-  return axios.default.patch(`/api/users/${userId}`, userUpdate, options);
+  userUpdateRequest: UserUpdateRequest,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<UserResponse>> => {
+  return axios.default.patch(
+    `/api/users/${userId}`,
+    userUpdateRequest,
+    options,
+  );
 };
 
 export const getUpdateUserInfoMutationOptions = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<
+    MultipleErrorResponse | BaseErrorResponse | HTTPValidationError
+  >,
+  TContext = unknown,
 >(options?: {
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserInfo>>,
     TError,
-    { userId: number | "me"; data: UserUpdate },
+    { userId: number | "me"; data: UserUpdateRequest },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateUserInfo>>,
   TError,
-  { userId: number | "me"; data: UserUpdate },
+  { userId: number | "me"; data: UserUpdateRequest },
   TContext
 > => {
   const mutationKey = ["updateUserInfo"];
@@ -214,7 +226,7 @@ export const getUpdateUserInfoMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateUserInfo>>,
-    { userId: number | "me"; data: UserUpdate }
+    { userId: number | "me"; data: UserUpdateRequest }
   > = (props) => {
     const { userId, data } = props ?? {};
 
@@ -227,30 +239,34 @@ export const getUpdateUserInfoMutationOptions = <
 export type UpdateUserInfoMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateUserInfo>>
 >;
-export type UpdateUserInfoMutationBody = UserUpdate;
-export type UpdateUserInfoMutationError = AxiosError<HTTPValidationError>;
+export type UpdateUserInfoMutationBody = UserUpdateRequest;
+export type UpdateUserInfoMutationError = AxiosError<
+  MultipleErrorResponse | BaseErrorResponse | HTTPValidationError
+>;
 
 /**
  * @summary Update User Info
  */
 export const useUpdateUserInfo = <
-  TError = AxiosError<HTTPValidationError>,
-  TContext = unknown
+  TError = AxiosError<
+    MultipleErrorResponse | BaseErrorResponse | HTTPValidationError
+  >,
+  TContext = unknown,
 >(
   options?: {
     mutation?: UseMutationOptions<
       Awaited<ReturnType<typeof updateUserInfo>>,
       TError,
-      { userId: number | "me"; data: UserUpdate },
+      { userId: number | "me"; data: UserUpdateRequest },
       TContext
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseMutationResult<
   Awaited<ReturnType<typeof updateUserInfo>>,
   TError,
-  { userId: number | "me"; data: UserUpdate },
+  { userId: number | "me"; data: UserUpdateRequest },
   TContext
 > => {
   const mutationOptions = getUpdateUserInfoMutationOptions(options);
@@ -263,7 +279,7 @@ export const useUpdateUserInfo = <
  */
 export const getProjects = (
   userId: number | "me",
-  options?: AxiosRequestConfig
+  options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<ProjectsResponse>> => {
   return axios.default.get(`/api/users/${userId}/projects`, options);
 };
@@ -274,7 +290,7 @@ export const getGetProjectsQueryKey = (userId: number | "me") => {
 
 export const getGetProjectsQueryOptions = <
   TData = Awaited<ReturnType<typeof getProjects>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -282,7 +298,7 @@ export const getGetProjectsQueryOptions = <
       UseQueryOptions<Awaited<ReturnType<typeof getProjects>>, TError, TData>
     >;
     axios?: AxiosRequestConfig;
-  }
+  },
 ) => {
   const { query: queryOptions, axios: axiosOptions } = options ?? {};
 
@@ -307,11 +323,13 @@ export const getGetProjectsQueryOptions = <
 export type GetProjectsQueryResult = NonNullable<
   Awaited<ReturnType<typeof getProjects>>
 >;
-export type GetProjectsQueryError = AxiosError<HTTPValidationError>;
+export type GetProjectsQueryError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
 
 export function useGetProjects<
   TData = Awaited<ReturnType<typeof getProjects>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options: {
@@ -328,13 +346,13 @@ export function useGetProjects<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): DefinedUseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetProjects<
   TData = Awaited<ReturnType<typeof getProjects>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -351,13 +369,13 @@ export function useGetProjects<
       >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
 export function useGetProjects<
   TData = Awaited<ReturnType<typeof getProjects>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -366,7 +384,7 @@ export function useGetProjects<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 };
@@ -376,7 +394,7 @@ export function useGetProjects<
 
 export function useGetProjects<
   TData = Awaited<ReturnType<typeof getProjects>>,
-  TError = AxiosError<HTTPValidationError>
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
 >(
   userId: number | "me",
   options?: {
@@ -385,11 +403,287 @@ export function useGetProjects<
     >;
     axios?: AxiosRequestConfig;
   },
-  queryClient?: QueryClient
+  queryClient?: QueryClient,
 ): UseQueryResult<TData, TError> & {
   queryKey: DataTag<QueryKey, TData, TError>;
 } {
   const queryOptions = getGetProjectsQueryOptions(userId, options);
+
+  const query = useQuery(queryOptions, queryClient) as UseQueryResult<
+    TData,
+    TError
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey;
+
+  return query;
+}
+
+/**
+ * Get projects for a user.
+ * @summary Update Notification
+ */
+export const updateNotification = (
+  userId: number | "me",
+  notificationId: string,
+  notificationUpdateRequest: NotificationUpdateRequest,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<UserResponse>> => {
+  return axios.default.patch(
+    `/api/users/${userId}/notifications/${notificationId}`,
+    notificationUpdateRequest,
+    options,
+  );
+};
+
+export const getUpdateNotificationMutationOptions = <
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateNotification>>,
+    TError,
+    {
+      userId: number | "me";
+      notificationId: string;
+      data: NotificationUpdateRequest;
+    },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateNotification>>,
+  TError,
+  {
+    userId: number | "me";
+    notificationId: string;
+    data: NotificationUpdateRequest;
+  },
+  TContext
+> => {
+  const mutationKey = ["updateNotification"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateNotification>>,
+    {
+      userId: number | "me";
+      notificationId: string;
+      data: NotificationUpdateRequest;
+    }
+  > = (props) => {
+    const { userId, notificationId, data } = props ?? {};
+
+    return updateNotification(userId, notificationId, data, axiosOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateNotificationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateNotification>>
+>;
+export type UpdateNotificationMutationBody = NotificationUpdateRequest;
+export type UpdateNotificationMutationError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
+
+/**
+ * @summary Update Notification
+ */
+export const useUpdateNotification = <
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof updateNotification>>,
+      TError,
+      {
+        userId: number | "me";
+        notificationId: string;
+        data: NotificationUpdateRequest;
+      },
+      TContext
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseMutationResult<
+  Awaited<ReturnType<typeof updateNotification>>,
+  TError,
+  {
+    userId: number | "me";
+    notificationId: string;
+    data: NotificationUpdateRequest;
+  },
+  TContext
+> => {
+  const mutationOptions = getUpdateNotificationMutationOptions(options);
+
+  return useMutation(mutationOptions, queryClient);
+};
+/**
+ * Get integrations for a user.
+ * @summary Get Integrations
+ */
+export const getIntegrations = (
+  userId: number | "me",
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<IntegrationsResponse>> => {
+  return axios.default.get(`/api/users/${userId}/integrations`, options);
+};
+
+export const getGetIntegrationsQueryKey = (userId: number | "me") => {
+  return [`/api/users/${userId}/integrations`] as const;
+};
+
+export const getGetIntegrationsQueryOptions = <
+  TData = Awaited<ReturnType<typeof getIntegrations>>,
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+>(
+  userId: number | "me",
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrations>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+) => {
+  const { query: queryOptions, axios: axiosOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getGetIntegrationsQueryKey(userId);
+
+  const queryFn: QueryFunction<Awaited<ReturnType<typeof getIntegrations>>> = ({
+    signal,
+  }) => getIntegrations(userId, { signal, ...axiosOptions });
+
+  return {
+    queryKey,
+    queryFn,
+    enabled: !!userId,
+    ...queryOptions,
+  } as UseQueryOptions<
+    Awaited<ReturnType<typeof getIntegrations>>,
+    TError,
+    TData
+  > & { queryKey: DataTag<QueryKey, TData, TError> };
+};
+
+export type GetIntegrationsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof getIntegrations>>
+>;
+export type GetIntegrationsQueryError = AxiosError<
+  BaseErrorResponse | HTTPValidationError
+>;
+
+export function useGetIntegrations<
+  TData = Awaited<ReturnType<typeof getIntegrations>>,
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+>(
+  userId: number | "me",
+  options: {
+    query: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrations>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrations>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrations>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): DefinedUseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrations<
+  TData = Awaited<ReturnType<typeof getIntegrations>>,
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+>(
+  userId: number | "me",
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrations>>,
+        TError,
+        TData
+      >
+    > &
+      Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getIntegrations>>,
+          TError,
+          Awaited<ReturnType<typeof getIntegrations>>
+        >,
+        "initialData"
+      >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+export function useGetIntegrations<
+  TData = Awaited<ReturnType<typeof getIntegrations>>,
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+>(
+  userId: number | "me",
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrations>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+};
+/**
+ * @summary Get Integrations
+ */
+
+export function useGetIntegrations<
+  TData = Awaited<ReturnType<typeof getIntegrations>>,
+  TError = AxiosError<BaseErrorResponse | HTTPValidationError>,
+>(
+  userId: number | "me",
+  options?: {
+    query?: Partial<
+      UseQueryOptions<
+        Awaited<ReturnType<typeof getIntegrations>>,
+        TError,
+        TData
+      >
+    >;
+    axios?: AxiosRequestConfig;
+  },
+  queryClient?: QueryClient,
+): UseQueryResult<TData, TError> & {
+  queryKey: DataTag<QueryKey, TData, TError>;
+} {
+  const queryOptions = getGetIntegrationsQueryOptions(userId, options);
 
   const query = useQuery(queryOptions, queryClient) as UseQueryResult<
     TData,

@@ -23,8 +23,8 @@ export function ProjectSkeleton() {
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-6">
-                  {Array.from({ length: 3 }).map((_, i) => (
-                    <div key={i} className="flex items-center gap-2">
+                  {[1, 2, 3].map((value) => (
+                    <div key={value} className="flex items-center gap-2">
                       <Skeleton className="h-5 w-5 rounded-full" />
                       <div className="space-y-2">
                         <Skeleton className="h-4 w-24" />
@@ -37,8 +37,8 @@ export function ProjectSkeleton() {
                 <div>
                   <Skeleton className="h-4 w-32 mb-4" />
                   <div className="space-y-4">
-                    {Array.from({ length: 3 }).map((_, i) => (
-                      <div key={i} className="flex items-center gap-2">
+                    {[1, 2, 3].map((value) => (
+                      <div key={value} className="flex items-center gap-2">
                         <Skeleton className="h-8 w-8 rounded-full" />
                         <div className="space-y-1">
                           <Skeleton className="h-4 w-32" />
@@ -65,14 +65,14 @@ export function ProjectSkeleton() {
           <CardContent>
             <div className="space-y-4">
               <div className="flex justify-between">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-4 w-24" />
+                {[1, 2, 3, 4, 5].map((value) => (
+                  <Skeleton key={value} className="h-4 w-24" />
                 ))}
               </div>
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex justify-between">
-                  {Array.from({ length: 5 }).map((_, j) => (
-                    <Skeleton key={j} className="h-6 w-24" />
+              {[1, 2, 3].map((value) => (
+                <div key={value} className="flex justify-between">
+                  {[1, 2, 3, 4, 5].map((value) => (
+                    <Skeleton key={value} className="h-6 w-24" />
                   ))}
                 </div>
               ))}

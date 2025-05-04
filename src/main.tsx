@@ -35,7 +35,7 @@ if (rootElement) {
           </ThemeProvider>
         </BrowserRouter>
       </QueryClientProvider>
-    </StrictMode>
+    </StrictMode>,
   );
 } else {
   console.error("Root element not found");
